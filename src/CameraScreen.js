@@ -3,14 +3,14 @@ import { View, Text, TouchableOpacity } from 'react-native';
 //import { Camera, Permissions } from 'expo';
 import * as Permissions from 'expo-permissions';
 import { Camera } from 'expo-camera'; 
-import { Ionicons } from '@expo/vector-icons';
 import ToolbarScreen from './ToolbarScreen';
 import Gallery from './GalleryScreen';
+import * as FileSystem from 'expo-file-system';
 
 import styles from './styles';
 //expo install expo-permissions
 //expo install expo-camera
-//yarn add react-native-easy-grid
+
 //yarn add @expo/vector-icons
 //npm install react-native-easy-grid --save
 
@@ -39,7 +39,16 @@ export default class CameraScreen extends React.Component {
 
     handleShortCapture = async () => {
         const photoData = await this.camera.takePictureAsync();
-        this.setState({ capturing: false, captures: [photoData, ...this.state.captures] })
+        this.setState({ capturing: false, captures: [photoData, ...this.state.captures] });
+
+        var filename = photoData.uri.split("/").pop();
+        console.log("PHOTO", photoData,filename);
+        
+        await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'images/')
+        await FileSystem.moveAsync({
+            from: photoData.uri,
+            to: FileSystem.documentDirectory + 'images/'+filename
+        });
     };
 
     handleLongCapture = async () => {
@@ -89,7 +98,7 @@ export default class CameraScreen extends React.Component {
                     onCaptureOut={this.handleCaptureOut}
                     onLongCapture={this.handleLongCapture}
                     onShortCapture={this.handleShortCapture}                
-                />  
+                />
             </React.Fragment>
         );
     };
